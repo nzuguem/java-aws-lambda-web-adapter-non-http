@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Micronaut Native on AWS Lambda
+
+Globals:
+  Function:
+    Timeout: 20
+    MemorySize: 256
+
+
+Resources:
+  MicronautNative:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures:
+        - x86_64
+      Runtime: provided.al2023
+      CodeUri: gha/aws
+      Handler: bootstrap.is.real.handler
+      Layers:
+        # Lambda Web Adapter (LWA)
+        - arn:aws:lambda:eu-west-1:753240598075:layer:LambdaAdapterLayerX86:20
+      Environment:
+        Variables:
+          RUST_LOG: debug
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
+          AWS_LWA_PASS_THROUGH_PATH: /hello/events
+      Events:
+        Trigger:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - cli.local
+              detail-type:
+                - test

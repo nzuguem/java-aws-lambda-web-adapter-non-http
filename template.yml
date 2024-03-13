@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Micronaut Native on AWS Lambda
+
+Parameters:
+  ArchCPU:
+    Description: The Architecture CPU
+    Type: String
+    Default: x86-64
+    AllowedValues:
+      - x86-64
+      - arm64
+      - aarch64
+    ConstraintDescription: must be a x86-64, arm64 or aarch64
+
+Mappings:
+  ArchitecturesMap:
+    arm64:
+      arch: arm64
+      lwa: arn:aws:lambda:eu-west-1:753240598075:layer:LambdaAdapterLayerArm64:20
+    aarch64:
+      arch: arm64
+      lwa: arn:aws:lambda:eu-west-1:753240598075:layer:LambdaAdapterLayerArm64:20
+    x86-64:
+      arch: x86_64
+      lwa: arn:aws:lambda:eu-west-1:753240598075:layer:LambdaAdapterLayerX86:20
+
+Globals:
+  Function:
+    Timeout: 20
+    MemorySize: 256
+
+
+Resources:
+  MicronautNative:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures:
+        - !FindInMap [ArchitecturesMap, !Ref ArchCPU, "arch"]
+      Runtime: provided.al2023
+      CodeUri: .
+      # The "codeUri" location requires a "bootsrap" shell script file and all the application's artifacts files.
+      # This file must contain the AWS Lambda application startup script.
+      # You can use a shell file other than "bootstrap", provided you use it as a handler for the Lambda function.
+      Handler: bootstrap.is.real.handler
+      Layers:
+        # Lambda Web Adapter (LWA)
+        - !FindInMap [ArchitecturesMap, !Ref ArchCPU, "lwa"]
+      Environment:
+        Variables:
+          RUST_LOG: debug
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
+          AWS_LWA_PASS_THROUGH_PATH: /hello/events
+      Events:
+        Trigger:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - cli.local
+              detail-type:
+                - test
+    Metadata:
+      BuildMethod: makefile

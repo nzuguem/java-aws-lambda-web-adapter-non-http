@@ -1,0 +1,7 @@
+[
+  {
+    "DetailType": "test",
+    "Source": "cli.local",
+    "Detail": "{\"greeting\":\"Hello World\"}"
+  }
+]
