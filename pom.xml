@@ -37,11 +37,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>io.micronaut.aws</groupId>
-      <artifactId>micronaut-aws-lambda-events-serde</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>io.micronaut.serde</groupId>
       <artifactId>micronaut-serde-jackson</artifactId>
       <scope>compile</scope>
@@ -94,9 +89,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <!-- Uncomment to enable incremental compilation -->
-          <!-- <useIncrementalCompilation>false</useIncrementalCompilation> -->
-
+          <useIncrementalCompilation>false</useIncrementalCompilation>
           <annotationProcessorPaths combine.children="append">
             <path>
               <groupId>io.micronaut</groupId>
@@ -121,6 +114,19 @@
           </compilerArgs>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <buildArgs>
+            <buildArg>--enable-sbom=cyclonedx</buildArg>
+            <buildArg>-H:BuildOutputJSONFile=/tmp/native-image-build-output.json</buildArg>
+            <buildArg>-H:+BuildReport</buildArg>
+            <buildArg>-H:+PrintClassInitialization</buildArg>
+            <!--<buildArg>-H:IncludeResources=com/amazonaws/lambda/thirdparty/org/joda/time/tz/data/.*</buildArg> -->
+          </buildArgs>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <profiles>
@@ -134,10 +140,8 @@
             <extensions>true</extensions>
             <configuration>
               <buildArgs combine.children="append">
-                <buildArg>--enable-sbom=cyclonedx</buildArg>
                 <buildArg>--static</buildArg>
                 <buildArg>--libc=musl</buildArg>
-                <buildArg>-H:BuildOutputJSONFile=/tmp/native-image-build-output.json</buildArg>
               </buildArgs>
             </configuration>
           </plugin>

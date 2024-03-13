@@ -1,7 +1,7 @@
 package fr.nzuguem.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fr.nzuguem.models.ScheduledEvent;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
@@ -14,18 +14,10 @@ public class HelloController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HelloController.class);
 
-    private final  ObjectMapper objectMapper;
-
-    public HelloController(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     @Post("events")
-    public HttpResponse<String> hello(@Body String body) throws JsonProcessingException {
+    public HttpResponse<String> helloEb(@Body ScheduledEvent event) {
 
-        var jsonNode = objectMapper.readTree(body);
-
-        LOGGER.info("Received Events : {}", jsonNode.toPrettyString());
+        LOGGER.info("Received Events : {}", event);
 
         return HttpResponse.ok("success");
     }
